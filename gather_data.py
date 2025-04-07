@@ -141,8 +141,28 @@ def store_cat_facts(facts):
     Args:
         facts (list of dict): List of cat fact objects.
     """
-    #TODO
-    pass
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    
+    for fact in facts:
+        text = fact.get("fact")
+        if text is None:
+            continue
+        try:
+            cur.execute("INSERT INTO CatFacts (fact) VALUES (?)", (text,))
+            new_id = cur.lastrowid
+            # Calculate metadata.
+            fact_length = len(text)
+            insertion_time = datetime.datetime.now().isoformat()
+            cur.execute(
+                "INSERT INTO CatFactMetadata (cat_fact_id, fact_length, insertion_time) VALUES (?, ?, ?)", 
+                (new_id, fact_length, insertion_time)
+            )
+            conn.commit()
+        except sqlite3.IntegrityError:
+            # Fact already exists; skip duplicate.
+            continue
+    conn.close()
 
 def store_dog_facts(facts):
     """
@@ -151,15 +171,35 @@ def store_dog_facts(facts):
     Args:
         facts (list of str): List of dog fact strings.
     """
-    #TODO
-    pass
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    
+    for fact in facts:
+        if fact is None:
+            continue
+        try:
+            cur.execute("INSERT INTO DogFacts (fact) VALUES (?)", (fact,))
+            conn.commit()
+        except sqlite3.IntegrityError:
+            # Fact already exists; skip duplicate.
+            continue
+    conn.close()
 
 def main():
     """
     Main function to create tables and fetch/store 25 new cat facts and 25 new dog facts.
     """
-    #TODO
-    pass
+    create_tables()
+    
+    # Fetch and store 25 new cat facts using the /fact endpoint.
+    cat_facts = fetch_cat_facts(n=25)
+    store_cat_facts(cat_facts)
+    
+    # Fetch and store 25 unique dog facts.
+    dog_facts = fetch_dog_facts(n=25)
+    store_dog_facts(dog_facts)
+    
+    print("Data gathering complete. New facts (if any) have been stored in the database.")
 
 if __name__ == '__main__':
     main()
