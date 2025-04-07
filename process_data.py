@@ -106,8 +106,18 @@ def write_word_frequency_csv(freq_cat, freq_dog, combined_freq, filename="word_f
         combined_freq (Counter): Combined word frequencies.
         filename (str): Name of the output CSV file.
     """
-    #TODO
-    pass
+    words = set(freq_cat.keys()) | set(freq_dog.keys())
+    with open(filename, "w", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["word", "freq_cat", "freq_dog", "freq_combined"])
+        for word in words:
+            writer.writerow([
+                word,
+                freq_cat.get(word, 0),
+                freq_dog.get(word, 0),
+                combined_freq.get(word, 0)
+            ])
+    print(f"Word frequency data written to {filename}")
 
 def visualize_top_words(freq, title, filename):
     """
@@ -118,8 +128,19 @@ def visualize_top_words(freq, title, filename):
         title (str): Title for the chart.
         filename (str): Name of the output image file.
     """
-    #TODO
-    pass
+    top_words = freq.most_common(20)
+    words, counts = zip(*top_words)
+    
+    plt.figure(figsize=(10,6))
+    plt.bar(words, counts)
+    plt.title(title)
+    plt.xlabel("Words")
+    plt.ylabel("Frequency")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.close()
+    print(f"Visualization saved as {filename}")
 
 def calculate_average_fact_length(joined_data):
     """
@@ -145,8 +166,23 @@ def main():
       - Writes the calculated frequencies to a CSV file.
       - Creates three visualizations (bar charts) for the top 20 words.
     """
-    #TODO
-    pass
+    joined_data = join_cat_facts_and_metadata()
+    if joined_data:
+        avg_length = calculate_average_fact_length(joined_data)
+        print(f"Average cat fact length: {avg_length:.2f} characters")
+    
+    cat_facts = get_all_cat_facts()
+    dog_facts = get_all_dog_facts()
+    
+    freq_cat = calculate_word_frequencies(cat_facts)
+    freq_dog = calculate_word_frequencies(dog_facts)
+    combined_freq = freq_cat + freq_dog
+    
+    write_word_frequency_csv(freq_cat, freq_dog, combined_freq)
+    
+    visualize_top_words(freq_cat, "Top 20 Words in Cat Facts", "cat_facts_top20.png")
+    visualize_top_words(freq_dog, "Top 20 Words in Dog Facts", "dog_facts_top20.png")
+    visualize_top_words(combined_freq, "Top 20 Words in Combined Facts", "combined_facts_top20.png")
 
 if __name__ == '__main__':
     main()
