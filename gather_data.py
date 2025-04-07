@@ -46,7 +46,7 @@ def create_tables():
     conn.commit()
     conn.close()
 
-def fetch_cat_facts(n=25):
+def fetch_cat_facts(n=10):
     """
     Fetches n new random cat facts using the /fact endpoint. 
     Each fact is checked to ensure it does not already exist in the database or in the current batch.
@@ -88,7 +88,7 @@ def fetch_cat_facts(n=25):
     
     return [{"fact": fact} for fact in new_facts]
 
-def fetch_dog_facts(n=25):
+def fetch_dog_facts(n=10):
     """
     Fetches n unique dog facts from the Dog API by kinduff in increments of 5 per request.
     Each fact is checked against existing facts in the database and within the current batch.
@@ -187,16 +187,16 @@ def store_dog_facts(facts):
 
 def main():
     """
-    Main function to create tables and fetch/store 25 new cat facts and 25 new dog facts.
+    Main function to create tables and fetch/store 10 new cat facts and 10 new dog facts.
     """
     create_tables()
     
-    # Fetch and store 25 new cat facts using the /fact endpoint.
-    cat_facts = fetch_cat_facts(n=25)
+    # Fetch and store 10 new cat facts using the /fact endpoint.
+    cat_facts = fetch_cat_facts(n=10)
     store_cat_facts(cat_facts)
     
-    # Fetch and store 25 unique dog facts.
-    dog_facts = fetch_dog_facts(n=25)
+    # Fetch and store 10 unique dog facts.
+    dog_facts = fetch_dog_facts(n=10)
     store_dog_facts(dog_facts)
     
     print("Data gathering complete. New facts (if any) have been stored in the database.")
